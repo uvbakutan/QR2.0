@@ -9,9 +9,9 @@ class slider {
   boolean   over;                // is the mouse over the slider?
   boolean   locked;              // captures the new position for the slider
   color     backgroundColor;     // background color for the slider
-  color     sliderActivColor;    //
-  color     sliderInactivColor;  //
-  PFont     font;                //
+  color     sliderActivColor;    
+  color     sliderInactivColor;  
+  PFont     font;                
 
   slider (String sn, float xp, float yp, int sw, int dc) {
     sName = sn;
@@ -82,14 +82,14 @@ class slider {
     
     fill(sliderInactivColor);
     rect(xPos, yPos-1, sWidth,2);
-    
-    text(sName, xPos,yPos-circleOr/2-3);
+
     text("0", xPos,yPos+circleOr); 
     text(sWidth, xPos+sWidth,yPos+circleOr);
     
     fill(sliderActivColor);
     rect(xPos, yPos-1, sPos-xPos,2);
-        
+    
+    text(sName, xPos,yPos-circleOr/2-3);    
     text(int(sPos-xPos), xPos+sWidth/2,yPos+circleOr);
 
     
