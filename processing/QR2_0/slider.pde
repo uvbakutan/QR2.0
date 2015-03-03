@@ -18,7 +18,7 @@ class slider {
     sWidth = sw;
     xPos = xp;
     yPos = yp;
-    sPos = xPos + sWidth/2;
+    sPos = xPos ;
     newsPos = sPos;
     sPosMin = xPos;
     sPosMax = xPos + sWidth;
@@ -40,7 +40,7 @@ class slider {
     if (mousePressed && over)
       locked = true;
     
-    if (!mousePressed) 
+    if (!mousePressed || !over) 
       locked = false;
     
     if (locked){
@@ -69,6 +69,10 @@ class slider {
   
   int getPrecent() {
     return int(((sPos-xPos)/sWidth) * 100);
+  }
+  
+  int getValue() {
+    return int(sPos-xPos);
   }
 
   void display() {
