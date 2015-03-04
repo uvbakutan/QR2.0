@@ -1,20 +1,35 @@
+#define motorFr   10    // Front left
+#define motorFl   9    // Front right
+#define motorBr   6    // back left
+#define motorBl   5    // back right
+
 #include <ADXL345.h>
 #include <HMC58X3.h>
 #include <L3G4200D.h>
 #include <I2Cdev.h>
 #include <EEPROM.h>
+#include <Pid.h>
 
-#define DEBUG
-#include "DebugUtils.h"
-#include "CommunicationUtils.h"
+//#define DEBUG
+//#include "DebugUtils.h"
+//#include "CommunicationUtils.h"
 #include "FreeIMU.h"
 #include <Wire.h>
 #include <SPI.h>
 
-char cmd;
 float ypr[3];
-int value(0);
-int type(0);
+float gyro[3];
+int val(0);
+int typ(0);
+int rotateR(0);
+int rateA(0);
+
+Pid pidPitchRate;
+Pid pidRollRate;
+Pid pidYawRate;
+Pid pidPitch;
+Pid pidRoll;
+Pid pidYaw;
 
 int i=0;
 int bat = 0;
@@ -23,79 +38,95 @@ int bat = 0;
 FreeIMU my3IMU = FreeIMU();
 
 void setup() {
+  Serial.begin(9600);
   Serial1.begin(115200);
   while (!Serial1){}
   initializeMotors();
+  initializePID();
   Wire.begin();
   my3IMU.init(true);
 }
 
 
 void loop() {
-  //my3IMU.getYawPitchRoll(ypr);
-  my3IMU.getEuler(ypr);
-  
+  my3IMU.getYawPitchRoll(ypr);
+  //my3IMU.getEuler(ypr);
+  my3IMU.gyro.readGyro(gyro);;
+
   if(Serial1.available()>3)
     readSerial();
- 
-    if(i++%10==0)
-     writeSerial();
+
+  if(i++%10==0)
+    writeSerial();
+
+   if(val>1){
+    int pitch = pidPitch.compute(ypr[2]-0);
+    int roll = pidRoll.compute(ypr[1]-0);
+    int pitch_output =  pidPitchRate.compute(pitch-gyro[0]);
+    int roll_output =   pidRollRate.compute(roll-gyro[1]);
+    //int yaw_output =   pids[PID_YAW_RATE].get_pid(gyroYaw - rcyaw, 1);
+    
+//    Serial.print(pitch);
+//    Serial.print("   ");
+//    Serial.print(roll);
+//    Serial.print("   ");
+//    Serial.print(pitch_output);
+//    Serial.print("   ");
+//    Serial.println(roll_output);
+    
+    int yaw_output = 0;
+    
+    analogWrite(motorFr, val - roll_output + pitch_output);
+    analogWrite(motorFl, val + roll_output + pitch_output);
+    analogWrite(motorBr, val - roll_output - pitch_output);
+    analogWrite(motorBl, val + roll_output - pitch_output);
+
+   }
+   else{
+     analogWrite(motorFr,val);
+     analogWrite(motorFl,val);
+     analogWrite(motorBr,val);
+     analogWrite(motorBl,val);
+
+     pidPitchRate.resetPid();
+     pidRollRate.resetPid();
+     pidYawRate.resetPid();
+     
+     pidPitch.resetPid();
+     pidRoll.resetPid();
+     pidYaw.resetPid();
+   }
 }
 
 
 void initializeMotors(){
-  pinMode(10,OUTPUT);
-  pinMode(5,OUTPUT);
-  pinMode(6,OUTPUT);
-  pinMode(9,OUTPUT);
+  pinMode(motorFr,OUTPUT);
+  pinMode(motorFl,OUTPUT);
+  pinMode(motorBr,OUTPUT);
+  pinMode(motorBl,OUTPUT);
   pinMode(17,OUTPUT);
-  
-  analogWrite(5,0);
-  analogWrite(6,0);
-  analogWrite(9,0);
-  analogWrite(10,0);
+
+  analogWrite(motorFr,0);
+  analogWrite(motorFl,0);
+  analogWrite(motorBr,0);
+  analogWrite(motorBl,0);
 }
 
-void readSerial(){
-    int startT(0);
-    int endT(0);
+void initializePID(){
 
-    startT=Serial1.read();
-    if( startT!=0xc5){
-      Serial1.flush();
-      Serial1.println("flushing");
-      return;
-    }
-    
-    type = Serial1.read();
-    value = Serial1.read();
-    endT = Serial1.read();
-    
-    if(endT!=0x5c){
-      Serial1.println("error");
-      return;
-    }
-    
-    analogWrite(5,value);
-    analogWrite(6,value);
-    analogWrite(9,value);
-    analogWrite(10,value);   
+ pidPitchRate.setMaxMin(5,-5);
+ pidRollRate.setMaxMin(5,-5);
+ pidYawRate.setMaxMin(5,-5);
+
+ pidPitchRate.setGainsK(0.0, 0.0, 0.0);
+ pidRollRate.setGainsK(0.0, 0.0, 0.0);
+ pidYawRate.setGainsK(0.0, 0.0, 0.0);
+ 
+ pidPitch.setMaxMin(100,-100);
+ pidRoll.setMaxMin(100,-100);
+ pidYaw.setMaxMin(100,-100);
+
+ pidPitch.setGainsK(0.0, 0.0, 0.0);
+ pidRoll.setGainsK(0.0, 0.0, 0.0);
+ pidYaw.setGainsK(0.0, 0.0, 0.0);
 }
-
-void writeSerial(){
-  Serial1.print("msg,");
-  Serial1.print(ypr[0]);
-  Serial1.print(",");
-  Serial1.print(ypr[1]);
-  Serial1.print(",");
-  Serial1.print(ypr[2]);
-   
-  bat=analogRead(3);
-  Serial1.print(",");
-  Serial1.print(float(bat*0.009765625));
-  Serial1.print(",");
-  Serial1.print(value);
-  Serial1.print(",");
-  Serial1.println(type);
-}
-
