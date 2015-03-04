@@ -51,8 +51,8 @@ void buildBoxShape() {
 
 void drawCube(float x, float y, float z) {  
   pushMatrix();
-    translate(width/2, height/2+100 , 0);
-    scale(1.5,1.5,1.5);
+    translate(width/2+200, height/2 , 0);
+    scale(2,2,2);
     
     // a demonstration of the following is at 
     // http://www.varesano.net/blog/fabio/ahrs-sensor-fusion-orientation-filter-3d-graphical-rotating-cube

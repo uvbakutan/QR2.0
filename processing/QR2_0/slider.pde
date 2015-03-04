@@ -13,7 +13,7 @@ class slider {
   color     sliderInactivColor;  
   PFont     font;                
 
-  slider (String sn, float xp, float yp, int sw, int dc) {
+  slider (String sn, float xp, float yp, int sw,int dc) {
     sName = sn;
     sWidth = sw;
     xPos = xp;
@@ -52,7 +52,7 @@ class slider {
         newsPos = mouseX;
     }
         
-   if(abs(newsPos-sPos)>1)         //because it would be stuck at 0.9999
+   if(abs(newsPos-sPos)>0.3)         //because it would be stuck at 0.9999
     sPos = sPos + (newsPos-sPos)/dC;
    else
     sPos=newsPos;
@@ -73,6 +73,10 @@ class slider {
   
   int getValue() {
     return int(sPos-xPos);
+  }
+  
+  boolean valueChanged(){
+    return (sPos-newsPos)!=0;
   }
 
   void display() {

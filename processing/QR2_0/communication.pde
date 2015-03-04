@@ -1,7 +1,7 @@
 void readValue(){
   String [] temp;
   s=myPort.readString();
-  //println(s);
+  println(s);
   if(s!=null){
       temp=split(s,',');
      if(temp!=null&&temp.length>3){
@@ -11,8 +11,8 @@ void readValue(){
          }
         catch(NumberFormatException e){}
       }
-      if(temp.length>4)
-        println(temp[4]);  
+      //if(temp.length>4)
+        //println(temp[4]);  
      }
   }  
 
