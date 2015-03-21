@@ -2,29 +2,34 @@ class slider {
   String    sName;
   int       sWidth;              // width of bar
   float     xPos, yPos;          // x and y position of bar
-  float     sPos, newsPos;       // x position of slider
+  float     fPos,sPos, newsPos;  // x position of slider
   float     sPosMin, sPosMax;    // max and min values of slider
   float     circleR, circleOr;   // inner and outer circle diameter
   int       dC;                  // damping coefficient
   boolean   over;                // is the mouse over the slider?
   boolean   locked;              // captures the new position for the slider
+  boolean   returning;           // moves the slider to the starting position
   color     backgroundColor;     // background color for the slider
   color     sliderActivColor;    
   color     sliderInactivColor;  
   PFont     font;                
 
-  slider (String sn, float xp, float yp, int sw,int dc) {
+  slider (String sn, float xp, float yp, int sw, float firstPos,int dc, boolean ret) {
     sName = sn;
     sWidth = sw;
     xPos = xp;
     yPos = yp;
-    sPos = xPos ;
+    fPos = xPos+firstPos;
+    sPos = fPos ;
     newsPos = sPos;
     sPosMin = xPos;
     sPosMax = xPos + sWidth;
     circleR=10;
     circleOr=25;
     dC = dc;
+    over=false;
+    locked=false;
+    returning=ret;
     backgroundColor =255;
     sliderActivColor = #009688;
     sliderInactivColor = #bdbdbd;
@@ -38,11 +43,12 @@ class slider {
       over = false;
     
     if (mousePressed && over)
-      locked = true;
-    
-    if (!mousePressed || !over) 
+      locked = true;   
+   else{
       locked = false;
-    
+      if(returning)
+        newsPos=fPos;
+   }
     if (locked){
       if(mouseX<xPos)
         newsPos=xPos;
