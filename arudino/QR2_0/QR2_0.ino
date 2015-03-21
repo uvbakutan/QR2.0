@@ -21,8 +21,11 @@ float ypr[3];
 float gyro[3];
 int val(0);
 int typ(0);
-int rotateR(0);
-int rateA(0);
+int pidRateCoef(0);
+int pidCoef(0);
+int desiredRoll(0);
+int desiredPitch(0);
+int desiredRate(0);
 
 Pid pidPitchRate;
 Pid pidRollRate;
@@ -51,7 +54,7 @@ void setup() {
 void loop() {
   my3IMU.getYawPitchRoll(ypr);
   //my3IMU.getEuler(ypr);
-  my3IMU.gyro.readGyro(gyro);;
+  my3IMU.gyro.readGyro(gyro);
 
   if(Serial1.available()>3)
     readSerial();
@@ -60,11 +63,18 @@ void loop() {
     writeSerial();
 
    if(val>1){
-    int pitch = pidPitch.compute(ypr[2]-0);
-    int roll = pidRoll.compute(ypr[1]-0);
-    int pitch_output =  pidPitchRate.compute(pitch-gyro[0]);
-    int roll_output =   pidRollRate.compute(roll-gyro[1]);
-    //int yaw_output =   pids[PID_YAW_RATE].get_pid(gyroYaw - rcyaw, 1);
+    int pitch = pidPitch.compute(desiredPitch-ypr[2]);
+    int roll = pidRoll.compute(ypr[1]-desiredRoll);
+    //int yaw = pidYaw.compute(ypr[0]-0);
+    int pitch_output =   pidPitchRate.compute(pitch-gyro[0]);
+    int roll_output  =   pidRollRate.compute(roll-gyro[1]);
+    //int yaw_output   =   pidYawRate.compute(0-gyro[2]);
+    int yaw_output   = 0;
+    
+    int motorFrOutput= (( val + roll_output - pitch_output + yaw_output)<0)?0: val + roll_output - pitch_output + yaw_output;
+    int motorFlOutput= (( val - roll_output - pitch_output - yaw_output)<0)?0: val - roll_output - pitch_output - yaw_output;
+    int motorBrOutput= (( val + roll_output + pitch_output + yaw_output)<0)?0: val + roll_output + pitch_output + yaw_output;
+    int motorBlOutput= (( val - roll_output + pitch_output - yaw_output)<0)?0: val - roll_output + pitch_output - yaw_output;
     
 //    Serial.print(pitch);
 //    Serial.print("   ");
@@ -72,14 +82,20 @@ void loop() {
 //    Serial.print("   ");
 //    Serial.print(pitch_output);
 //    Serial.print("   ");
-//    Serial.println(roll_output);
+//    Serial.print(roll_output);
+//    Serial.print("   ");
+//    Serial.print( motorFrOutput);
+//    Serial.print("   ");
+//    Serial.print( motorFlOutput);
+//    Serial.print("   ");
+//    Serial.print( motorBrOutput);
+//    Serial.print("   ");
+//    Serial.println( motorBlOutput);
     
-    int yaw_output = 0;
-    
-    analogWrite(motorFr, val - roll_output + pitch_output);
-    analogWrite(motorFl, val + roll_output + pitch_output);
-    analogWrite(motorBr, val - roll_output - pitch_output);
-    analogWrite(motorBl, val + roll_output - pitch_output);
+    analogWrite(motorFr, motorFrOutput);
+    analogWrite(motorFl, motorFlOutput);
+    analogWrite(motorBr, motorBrOutput);
+    analogWrite(motorBl, motorBlOutput);
 
    }
    else{
@@ -114,17 +130,17 @@ void initializeMotors(){
 
 void initializePID(){
 
- pidPitchRate.setMaxMin(5,-5);
- pidRollRate.setMaxMin(5,-5);
- pidYawRate.setMaxMin(5,-5);
+ pidPitchRate.setMaxMin(25,-25);
+ pidRollRate.setMaxMin(25,-25);
+ pidYawRate.setMaxMin(25,-25);
 
  pidPitchRate.setGainsK(0.0, 0.0, 0.0);
  pidRollRate.setGainsK(0.0, 0.0, 0.0);
  pidYawRate.setGainsK(0.0, 0.0, 0.0);
  
- pidPitch.setMaxMin(100,-100);
- pidRoll.setMaxMin(100,-100);
- pidYaw.setMaxMin(100,-100);
+ pidPitch.setMaxMin(250,-250);
+ pidRoll.setMaxMin(250,-250);
+ pidYaw.setMaxMin(250,-250);
 
  pidPitch.setGainsK(0.0, 0.0, 0.0);
  pidRoll.setGainsK(0.0, 0.0, 0.0);
