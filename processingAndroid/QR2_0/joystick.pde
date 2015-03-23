@@ -122,8 +122,8 @@ boolean over = false ;
       text("yaw "+ (getXvalue()-10), xLocation+circleEr/2+25,yLocation+25);
     }
     else{
-      text("roll "+ (getYvalue()-10), xLocation-circleEr/2-25,yLocation-25);
-      text("pitch "+ (getXvalue()-10), xLocation-circleEr/2-25,yLocation+25);
+      text("pitch "+ (getYvalue()-10), xLocation-circleEr/2-25,yLocation-25);
+      text("roll "+ (getXvalue()-10), xLocation-circleEr/2-25,yLocation+25);
     }
       
     

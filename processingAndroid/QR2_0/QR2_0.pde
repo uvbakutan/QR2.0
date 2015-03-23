@@ -12,6 +12,7 @@ ArrayList<String> devicesDiscovered = new ArrayList();
 
 boolean connectPressed = false; // for the button
 boolean connected = false; // for the button
+boolean discovered = false; // for the button
 int actionMask;
 
 
@@ -160,19 +161,30 @@ void displayText(){
 
 void displayButton(){
     for (int i = 0; i < 2; i++) 
-      if(dist(xTouch[i],yTouch[i],displayWidth/2,100)<80/2 && ( actionMask == 5 ||  actionMask == 0))
+      if(dist(xTouch[i],yTouch[i],displayWidth/2,100)<80/2 && ( actionMask == 5 ||  actionMask == 0)){
         connectPressed=!connectPressed;
+        // if(!connected && !connectPressed)
+        //       bt.discoverDevices();
+      }
+      
+    for (int i = 0; i < 2; i++) 
+      if(dist(xTouch[i],yTouch[i],displayWidth/2,220)<80/2 && ( actionMask == 5 ||  actionMask == 0)){
+         bt.discoverDevices();
+      }
         
-  if(connectPressed && !connected){     
-    bt.connectToDeviceByName("Bakatanio8");
-    connected = true;
+  if(connectPressed && !connected){
+    if(devicesDiscovered.size()>0){
+      bt.connectToDeviceByName("Bakatanio8");
+      connected = true;
+    }
   }
-  if(!connectPressed && connected){     
-    bt.stop();
-    bt.start();
-    connected = false;
-    bt.discoverDevices();
-  }
+  // if(!connectPressed && connected){     
+  //   bt.stop();
+  //   bt.start();
+  //   devicesDiscovered.clear();
+  //   connected = false;
+  // }
+  
   
   fill((connectPressed)?#009688:#bdbdbd);
   ellipse(displayWidth/2,100,80,80);
@@ -181,17 +193,25 @@ void displayButton(){
   textSize(30);
   text("C",displayWidth/2,100);
   textSize(13);
+  
+  fill((devicesDiscovered.size()>0)?#009688:#bdbdbd);
+  ellipse(displayWidth/2,220,80,80);
+  textAlign(CENTER,CENTER);
+  fill(255);
+  textSize(30);
+  text("D",displayWidth/2,220);
+  textSize(13);
 
 }
 
 void sendData(){
-  if(j1.valueXChanged())
-    writeValue(j1.getXvalue(),1);
+  // if(j1.valueXChanged())
+  //   writeValue(j1.getXvalue(),1);
   if(j1.valueYChanged())
-    writeValue(j1.getYvalue(),2);
+    writeValue(j1.getYvalue(),1);
     
   if(j2.valueXChanged())
     writeValue(j2.getXvalue(),3);
   if(j2.valueYChanged())
-    writeValue(j2.getYvalue(),4);
+    writeValue(j2.getYvalue(),2);
 }
