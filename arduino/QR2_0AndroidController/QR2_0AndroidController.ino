@@ -21,11 +21,8 @@ float ypr[3];
 float gyro[3];
 int val(0);
 int typ(0);
-int pidRateCoef(0);
-int pidCoef(0);
 int desiredRoll(0);
 int desiredPitch(0);
-int desiredRate(0);
 
 Pid pidPitchRate;
 Pid pidRollRate;
@@ -134,15 +131,15 @@ void initializePID(){
  pidRollRate.setMaxMin(25,-25);
  pidYawRate.setMaxMin(25,-25);
 
- pidPitchRate.setGainsK(0.0, 0.0, 0.0);
- pidRollRate.setGainsK(0.0, 0.0, 0.0);
+ pidPitchRate.setGainsK(55/1000.0, 0.0, 0.0);
+ pidRollRate.setGainsK(55/1000.0, 0.0, 0.0);
  pidYawRate.setGainsK(0.0, 0.0, 0.0);
  
  pidPitch.setMaxMin(250,-250);
  pidRoll.setMaxMin(250,-250);
  pidYaw.setMaxMin(250,-250);
 
- pidPitch.setGainsK(0.0, 0.0, 0.0);
- pidRoll.setGainsK(0.0, 0.0, 0.0);
- pidYaw.setGainsK(0.0, 0.0, 0.0);
+ pidPitch.setGainsK(5, 0.0, 0.0);
+ pidRoll.setGainsK(5, 0.0, 0.0);
+ pidYaw.setGainsK(5, 0.0, 0.0);
 }
