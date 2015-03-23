@@ -1,10 +1,47 @@
 import android.view.MotionEvent;
 
+//required for BT enabling on startup
+import android.content.Intent;
+import android.os.Bundle;
+
+import ketai.net.bluetooth.*;
+import ketai.net.*;
+
+KetaiBluetooth bt;
+ArrayList<String> devicesDiscovered = new ArrayList();
+
+boolean connectPressed = false; // for the button
+boolean connected = false; // for the button
+int actionMask;
+
+
+//********************************************************************
+// The following code is required to enable bluetooth at startup.
+//********************************************************************
+void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  bt = new KetaiBluetooth(this);
+}
+
+void onActivityResult(int requestCode, int resultCode, Intent data) {
+  bt.onActivityResult(requestCode, resultCode, data);
+}
+
+//********************************************************************
+
+
+
+boolean foundDevice=false; //When true, the screen turns green.
+boolean BTisConnected=false; //When true, the screen turns purple.
+String readMessage;
+
+
+
 int TouchEvents;
 float xTouch[];
 float yTouch[];
 int currentPointerId = 0;
-boolean printFPS;
+PFont fontD;
 
 
 joystick j1,j2;
@@ -13,32 +50,42 @@ joystick j1,j2;
 void setup() {
   size(displayWidth, displayHeight);
   orientation(LANDSCAPE);
-  textAlign(CENTER);
   background(255);
+  noStroke();
 
   xTouch = new float[2];
   yTouch = new float[2]; // Don't use more than ten fingers!
   
-  j1 = new joystick(200, 350, 1, true);
-  j2 = new joystick(displayWidth - 200, 350, 1, false);
-
+  j1 = new joystick(200, 350, 3, true);
+  j2 = new joystick(displayWidth - 200, 350, 3, false);
+  
+  fontD = createFont("Calibri", 5, true); 
+  
+  bt.start();          //start listening for BT connections
 }
 
 //-----------------------------------------------------------------------------------------
 
 void draw() {
-  background(255);
   
+  devicesDiscovered = bt.getDiscoveredDeviceNames();
+
+  background(255);
+  displayText();
+  displayButton();
   j1.display();
   j2.display();
   
   //println(actionMask);
+  
+  if (frameCount % 5 == 0 && connected)
+   sendData();
+
 }
 
 //-----------------------------------------------------------------------------------------
 
 public boolean surfaceTouchEvent(MotionEvent event) {
-  int actionMask;
   int actionIndex;
 
   // Number of places on the screen being touched:
@@ -91,4 +138,60 @@ public boolean surfaceTouchEvent(MotionEvent event) {
   // If you want the variables for motionX/motionY, mouseX/mouseY etc.
   // to work properly, you'll need to call super.surfaceTouchEvent().
   return super.surfaceTouchEvent(event);
+}
+
+//Call back method to manage data received
+void onBluetoothDataEvent(String who, byte[] data){
+  
+  readMessage = new String(data, 0, data.length);
+}
+
+
+void displayText(){
+  textAlign(LEFT);
+  text("found bluetooth device: ",50,60);
+  for (int i=0; i < devicesDiscovered.size(); i++)
+        text("["+i+"] "+devicesDiscovered.get(i).toString(),50,80+i*20);
+
+  // if(BTisConnected)
+  //   text("connected succesfully to" + discoveredDeviceName, 50,80);
+   text("from arduino  "+readMessage, 300, 40);
+}
+
+void displayButton(){
+    for (int i = 0; i < 2; i++) 
+      if(dist(xTouch[i],yTouch[i],displayWidth/2,100)<80/2 && ( actionMask == 5 ||  actionMask == 0))
+        connectPressed=!connectPressed;
+        
+  if(connectPressed && !connected){     
+    bt.connectToDeviceByName("Bakatanio8");
+    connected = true;
+  }
+  if(!connectPressed && connected){     
+    bt.stop();
+    bt.start();
+    connected = false;
+    bt.discoverDevices();
+  }
+  
+  fill((connectPressed)?#009688:#bdbdbd);
+  ellipse(displayWidth/2,100,80,80);
+  textAlign(CENTER,CENTER);
+  fill(255);
+  textSize(30);
+  text("C",displayWidth/2,100);
+  textSize(13);
+
+}
+
+void sendData(){
+  if(j1.valueXChanged())
+    writeValue(j1.getXvalue(),1);
+  if(j1.valueYChanged())
+    writeValue(j1.getYvalue(),2);
+    
+  if(j2.valueXChanged())
+    writeValue(j2.getXvalue(),3);
+  if(j2.valueYChanged())
+    writeValue(j2.getYvalue(),4);
 }

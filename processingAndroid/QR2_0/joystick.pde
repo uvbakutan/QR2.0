@@ -1,6 +1,7 @@
 class joystick {
   float     xLocation, yLocation;  // lostacion of joystick
   float     xPos, yPos;            // x and y position of joystick
+  float     xPrevious, yPrevious;  // x and y position of joystick
   float     xNewPos,yNewPos;       // x and y new position
   float     posMax;                // max distance for joystick
   float     circleR, circleEr;     // inner and outer circle diameter
@@ -29,14 +30,19 @@ class joystick {
     yPos = (mode)? yL+circleEr/2:yL;
     xNewPos = xPos;
     yNewPos = yPos;
+    xPrevious = xPos;
+    yPrevious = yPos;
     
     font = createFont("Calibri", 5, true); 
   }
 
   void update() {
     isOverEvent();
+    
+    xPrevious = xPos;
+    yPrevious = yPos;
         
-    if(abs(xNewPos-xPos)>0.9 || abs(xNewPos-xPos)>0.9 ){
+    if(abs(xNewPos-xPos)>0.2 || abs(xNewPos-xPos)>0.2 ){
       xPos = xPos + (xNewPos-xPos)/dC;
       yPos = yPos + (yNewPos-yPos)/dC;
     }
@@ -77,9 +83,13 @@ boolean over = false ;
      return constrain((int)map(xPos,xLocation-circleEr/2,xLocation+circleEr/2,20,0),0,20);
   }
   
-//  boolean valueChanged(){
-//    return (sPos-newsPos)!=0;
-//  }
+  boolean valueXChanged(){
+    return (abs(xPos-xPrevious))>0;
+  }
+  
+  boolean valueYChanged(){
+    return (abs(yPos-yPrevious))>0;
+  }
 
   void display() {
     
@@ -104,6 +114,8 @@ boolean over = false ;
     fill(joystickColor);
     noStroke();
     ellipse(xPos, yPos, circleR,circleR);
+    
+    textAlign(CENTER);
     
     if(mode){
       text("motorSpeed "+getYvalue(), xLocation+circleEr/2+45,yLocation-25);

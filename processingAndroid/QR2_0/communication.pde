@@ -1,28 +1,10 @@
-/*void readValue(){
-  String [] temp;
-  s=myPort.readString();
-  println(s);
-  if(s!=null){
-      temp=split(s,',');
-     if(temp!=null&&temp.length>3){
-      for(int i=1; i<4;i++){
-        try{
-         YPR[i-1] = Float.parseFloat(temp[i]);
-         }
-        catch(NumberFormatException e){}
-      }
-      //if(temp.length>4)
-        //println(temp[4]);  
-     }
-  }  
-
-}
-
 void writeValue(int data, int type){
-  myPort.write(0xc5); // start
-  myPort.write(type); // type of data
-  myPort.write(data); // byte of data
-  myPort.write(0x5c); // end
+  byte [] btData = new byte [4];
+  btData[0] = (byte)0xc5; // start
+  btData[1] = (byte)(type >> 0); // type of data
+  btData[2] = (byte)(data >> 0); // byte of data
+  btData[3] = (byte)0x5c; // end
+  bt.broadcast(btData);
   println("printing data "+ data);
 }
-*/
+
