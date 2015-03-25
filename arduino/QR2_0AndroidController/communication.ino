@@ -22,10 +22,10 @@ void readSerial(){
           val=testVal;
           break;
         case 2:
-          desiredPitch=testVal-10;
+          desiredPitch=(testVal-10)*2;
           break;
         case 3:
-          desiredRoll=testVal-10;
+          desiredRoll=(testVal-10)*2;
           break;
         default:  
           break;
