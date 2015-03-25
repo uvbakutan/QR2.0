@@ -80,7 +80,7 @@ boolean over = false ;
   }
   
  int getXvalue() {
-     return constrain((int)map(xPos,xLocation-circleEr/2,xLocation+circleEr/2,20,0),0,20);
+     return constrain((int)map(xPos,xLocation-circleEr/2,xLocation+circleEr/2,0,20),0,20);
   }
   
   boolean valueXChanged(){
@@ -116,6 +116,7 @@ boolean over = false ;
     ellipse(xPos, yPos, circleR,circleR);
     
     textAlign(CENTER);
+    textSize(13);
     
     if(mode){
       text("motorSpeed "+getYvalue(), xLocation+circleEr/2+45,yLocation-25);

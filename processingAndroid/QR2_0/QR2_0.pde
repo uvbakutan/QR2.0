@@ -14,6 +14,7 @@ boolean connectPressed = false; // for the button
 boolean connected = false; // for the button
 boolean discovered = false; // for the button
 int actionMask;
+float battery = 8.4;
 
 
 //********************************************************************
@@ -34,7 +35,8 @@ void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 boolean foundDevice=false; //When true, the screen turns green.
 boolean BTisConnected=false; //When true, the screen turns purple.
-String readMessage;
+boolean moreThanTwo=false; //When true, the screen turns purple.
+String readMessage = "";
 
 
 
@@ -96,8 +98,10 @@ public boolean surfaceTouchEvent(MotionEvent event) {
     // If no action is happening, listen for new events else 
     for (int i = 0; i < TouchEvents; i++) {
       int pointerId = event.getPointerId(i);
-      xTouch[pointerId] = event.getX(i); 
-      yTouch[pointerId] = event.getY(i);
+      if(pointerId<2){
+        xTouch[pointerId] = event.getX(i); 
+        yTouch[pointerId] = event.getY(i);
+      }
       float siz = event.getSize(i);
     }
   
@@ -126,14 +130,19 @@ public boolean surfaceTouchEvent(MotionEvent event) {
 
     }
     
-    if(actionMask == 1 || actionMask == 6){                      // if finger is lifted the position is 0,0
-      xTouch[event.getPointerId(actionIndex)] = 0.0;                  
-      yTouch[event.getPointerId(actionIndex)] = 0.0;
+    if(actionMask == 1 || actionMask == 6){   // if finger is lifted the position is 0,0
+    int index = event.getPointerId(actionIndex);
+      if(index<2){
+        xTouch[index] = 0.0;                  
+        yTouch[index] = 0.0;
+      }
     }
+    
+    moreThanTwo = false;
 
   }
   else{
-  //text crazy
+       moreThanTwo = true;
   }
 
   // If you want the variables for motionX/motionY, mouseX/mouseY etc.
@@ -141,22 +150,39 @@ public boolean surfaceTouchEvent(MotionEvent event) {
   return super.surfaceTouchEvent(event);
 }
 
-//Call back method to manage data received
-void onBluetoothDataEvent(String who, byte[] data){
-  
-  readMessage = new String(data, 0, data.length);
-}
 
 
 void displayText(){
+  int batteryIndicator;
+  color batteryColor;
   textAlign(LEFT);
-  text("found bluetooth device: ",50,60);
+  textSize(15);
+  text("bluetooth device: ",50,60);
+  if(bt.isDiscovering()==true && devicesDiscovered.size() == 0)
+    text("discovering ...",50,80);
   for (int i=0; i < devicesDiscovered.size(); i++)
         text("["+i+"] "+devicesDiscovered.get(i).toString(),50,80+i*20);
 
-  // if(BTisConnected)
-  //   text("connected succesfully to" + discoveredDeviceName, 50,80);
-   text("from arduino  "+readMessage, 300, 40);
+  if(moreThanTwo)
+    text("you can only use 2 fingers", 350,300);
+    
+  //text("from arduino  "+readMessage, displayWidth-300, 150);
+  
+  batteryIndicator = (int)map(battery,6.3,8.4,0,100);
+  
+  batteryColor = (batteryIndicator > 20)?#009688: #e53935;
+
+  stroke(batteryColor);
+  noFill();
+  rect(displayWidth-180,55,5*18,23);
+  fill(batteryColor);
+  rect(displayWidth-185,63,5,8);
+
+  for(int i=0;i<batteryIndicator; i=i+20){
+    rect(displayWidth-107-i*0.82,59,10,15);
+  }
+  text(batteryIndicator+"% ", displayWidth-80, 64);
+  text(battery+"V ", displayWidth-80, 80);
 }
 
 void displayButton(){
@@ -169,23 +195,25 @@ void displayButton(){
       
     for (int i = 0; i < 2; i++) 
       if(dist(xTouch[i],yTouch[i],displayWidth/2,220)<80/2 && ( actionMask == 5 ||  actionMask == 0)){
-         bt.discoverDevices();
+        if(bt.isDiscovering()==false);
+           bt.discoverDevices();
       }
         
   if(connectPressed && !connected){
     if(devicesDiscovered.size()>0){
-      bt.connectToDeviceByName("Bakatanio8");
-      connected = true;
+       connected = bt.connectToDeviceByName("Bakatanio8");
+
     }
   }
-  // if(!connectPressed && connected){     
-  //   bt.stop();
-  //   bt.start();
-  //   devicesDiscovered.clear();
-  //   connected = false;
-  // }
   
+   if(!connectPressed && connected){     
+     bt.stop();
+     bt.start();
+     devicesDiscovered.clear();
+     connected = false;
+   }
   
+  noStroke();
   fill((connectPressed)?#009688:#bdbdbd);
   ellipse(displayWidth/2,100,80,80);
   textAlign(CENTER,CENTER);
@@ -200,18 +228,7 @@ void displayButton(){
   fill(255);
   textSize(30);
   text("D",displayWidth/2,220);
-  textSize(13);
 
 }
 
-void sendData(){
-  // if(j1.valueXChanged())
-  //   writeValue(j1.getXvalue(),1);
-  if(j1.valueYChanged())
-    writeValue(j1.getYvalue(),1);
-    
-  if(j2.valueXChanged())
-    writeValue(j2.getXvalue(),3);
-  if(j2.valueYChanged())
-    writeValue(j2.getYvalue(),2);
-}
+
