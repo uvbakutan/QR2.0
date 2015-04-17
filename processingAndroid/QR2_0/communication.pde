@@ -18,15 +18,15 @@ void onBluetoothDataEvent(String who, byte[] data){
 }
 
 void sendData(){
-  // if(j1.valueXChanged())
-  //   writeValue(j1.getXvalue(),1);
+  if(j1.valueXChanged())
+     writeValue(j1.getXvalue(),2);
   if(j1.valueYChanged())
     writeValue(j1.getYvalue(),1);
     
   if(j2.valueXChanged())
-    writeValue(j2.getXvalue(),3);
+    writeValue(j2.getXvalue(),4);
   if(j2.valueYChanged())
-    writeValue(j2.getYvalue(),2);
+    writeValue(j2.getYvalue(),3);
 }
 
 void writeValue(int data, int type){

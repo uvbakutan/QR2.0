@@ -23,6 +23,7 @@ int val(0);
 int typ(0);
 int desiredRoll(0);
 int desiredPitch(0);
+int desiredYawRate(0);
 
 Pid pidPitchRate;
 Pid pidRollRate;
@@ -62,11 +63,10 @@ void loop() {
    if(val>1){
     int pitch = pidPitch.compute(desiredPitch-ypr[2]);
     int roll = pidRoll.compute(ypr[1]-desiredRoll);
-    //int yaw = pidYaw.compute(ypr[0]-0);
+
     int pitch_output =   pidPitchRate.compute(pitch-gyro[0]);
     int roll_output  =   pidRollRate.compute(roll-gyro[1]);
-    int yaw_output   =   pidYawRate.compute(0-gyro[2]);
-    //int yaw_output   = 0;
+    int yaw_output   =   pidYawRate.compute(desiredYawRate-gyro[2]);
     
     int motorFrOutput= (( val + roll_output - pitch_output - yaw_output)<0)?0: val + roll_output - pitch_output - yaw_output;
     int motorFlOutput= (( val - roll_output - pitch_output + yaw_output)<0)?0: val - roll_output - pitch_output + yaw_output;
@@ -133,7 +133,7 @@ void initializePID(){
 
  pidPitchRate.setGainsK(0.055, 0.0, 0.0);
  pidRollRate.setGainsK(0.055, 0.0, 0.0);
- pidYawRate.setGainsK(0.85, 0.0, 0.0);
+ pidYawRate.setGainsK(1.3, 0.0, 0.0);
  
  pidPitch.setMaxMin(250,-250);
  pidRoll.setMaxMin(250,-250);

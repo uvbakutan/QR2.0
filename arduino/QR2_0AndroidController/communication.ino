@@ -15,16 +15,19 @@ void readSerial(){
     testVal = Serial1.read();
     endT = Serial1.read();
     
-    if(endT==0x5c && (testTyp>0 && testTyp<4) && (testVal>=0 && testVal <= 255) ){
+    if(endT==0x5c && (testTyp>0 && testTyp<5) && (testVal>=0 && testVal <= 255) ){
       typ=testTyp;
       switch(testTyp){
         case 1:
           val=testVal;
           break;
         case 2:
-          desiredPitch=(testVal-10)*2;
+          desiredYawRate=(testVal-10)*5;
           break;
         case 3:
+          desiredPitch=(testVal-10)*2;
+          break;
+        case 4:
           desiredRoll=(testVal-10)*2;
           break;
         default:  
@@ -44,6 +47,8 @@ void writeSerial(){
   Serial1.print(float(bat*0.009765625));
   Serial1.print(",");
   Serial1.print(val);
+  Serial1.print(",");
+  Serial1.print(desiredYawRate);
   Serial1.print(",");
   Serial1.print(desiredPitch);
   Serial1.print(",");
